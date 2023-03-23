@@ -1,8 +1,10 @@
-import gymnasium as gym
-import os
-from agents.QLearningAgent import QLearningAgent
-import joblib
 import argparse
+import os
+
+import gymnasium as gym
+import joblib
+
+from agents.QLearningAgent import QLearningAgent
 
 ALPHA = 0.7
 GAMMA = 0.95

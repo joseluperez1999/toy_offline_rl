@@ -1,8 +1,11 @@
+import argparse
+import os
+
 import gymnasium as gym
 import joblib
+
 from agents.QLearningAgent import QLearningAgent
-import os
-import argparse
+
 
 def collect(env, agent, datasets_path, n_episodes, expertise, exploration_rate = 0):
     dataset = []
@@ -54,4 +57,5 @@ if __name__ == '__main__':
     if not os.path.exists(path):
         os.mkdir(path)
     collect(env, agent, path, args.amount, args.level, args.randomness)
+    
     print("End")
