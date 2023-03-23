@@ -2,8 +2,9 @@ import gymnasium as gym
 import joblib
 from QLearningAgent import QLearningAgent
 import os
+import argparse
 
-def collect(env, agent, datasets_path, n_episodes, exploration_rate = 0):
+def collect(env, agent, datasets_path, n_episodes, expertise, exploration_rate = 0):
     dataset = []
     for i in range(n_episodes):
         episode = []
@@ -19,22 +20,38 @@ def collect(env, agent, datasets_path, n_episodes, exploration_rate = 0):
             state = next_state
         dataset.append(episode)
     
-    datasets_path = datasets_path + "Frozen_Lake/"
+    datasets_path = datasets_path + env.spec.id + "/"
     
     if not os.path.exists(datasets_path):
         print("Generating datasets directory for this env")
         os.makedirs(datasets_path)
-    joblib.dump(dataset,f'{datasets_path}dataset_{n_episodes}_{exploration_rate}.pkl', compress=1) #Mejorar nomenclatura datasets
+        
+    #Mejorar nomenclatura datasets
+    joblib.dump(dataset,f'{datasets_path}dataset_{n_episodes}_{expertise}_{exploration_rate}.pkl', compress=1)
 
 if __name__ == '__main__':
     #Meter argumentos de entorno, agente e hiperparámetros por argumento
-    env = gym.make('FrozenLake-v1', desc=None, map_name="8x8", is_slippery=False)
-    policy = joblib.load("policies/Frozen_Lake/policy_episode_2000.pkl") #Hardcodeado para probar
+    parser = argparse.ArgumentParser(description='Generate policies given an environment')
+    parser.add_argument('--env', '-e', type=str, required=True, help='Environment name')
+    parser.add_argument('--amount', '-a', type=int, required=True, help='Number of episodes to collect')
+    parser.add_argument('--level', '-l', type=int, required=True, help='Expertise level of policy')
+    parser.add_argument('--randomness', '-r', type=int, required=True, help='Exploration rate')
+    args = parser.parse_args()
+    
+    match args.env:
+        case "Frozen-Lake":
+            env = gym.make("FrozenLake-v1", desc=None, map_name="8x8", is_slippery=False)
+        case "Mountain-Car":
+            raise Exception("Developing")
+        case _:
+            raise Exception("Environment not registred")
+        
+    policy = joblib.load(f"policies/{env.spec.id}/policy_episode_{args.level}.pkl") # type: ignore
     agent = QLearningAgent(env,policy.shape)
     agent.set_policy(policy)
     
     path =  "datasets/"
     if not os.path.exists(path):
         os.mkdir(path)
-    collect(env, agent, path, 1000, 0)
+    collect(env, agent, path, args.amount, args.level, args.randomness)
     print("End")

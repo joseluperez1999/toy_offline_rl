@@ -2,6 +2,7 @@ import gymnasium as gym
 import os
 from QLearningAgent import QLearningAgent
 import joblib
+import argparse
 
 ALPHA = 0.7
 GAMMA = 0.95
@@ -45,7 +46,7 @@ def save_policy(path,agent,episode):
     joblib.dump(agent.Q_table,f'{path}policy_episode_{episode}.pkl', compress=1)
         
 def train(env,agent,policies_path):
-    env_path = policies_path + "Frozen_Lake/"
+    env_path = policies_path + env.spec.id + "/"
     for episode in range(TRAIN_EPISODES):
         if episode == 0:
             print(f"Saving random policy, path: {env_path}")
@@ -66,14 +67,27 @@ def train(env,agent,policies_path):
             save_policy(env_path,agent,episode + 1)
         
 if __name__ == '__main__':
-    #Meter argumentos de entorno, agente e hiperparámetros por argumento
-    env = gym.make('FrozenLake-v1', desc=None, map_name="8x8", is_slippery=False)
-    Q_shape = (env.observation_space.n,env.action_space.n) # type: ignore
+    #Meter argumentos de entorno, agente e hiperparámetros
+    parser = argparse.ArgumentParser(description='Generate policies given an environment')
+    parser.add_argument('--env', '-e', type=str, required=True, help='Environment name')
+    args = parser.parse_args()
+    
+    match args.env:
+        case "Frozen-Lake":
+            env = gym.make("FrozenLake-v1", desc=None, map_name="8x8", is_slippery=False)
+            Q_shape = (env.observation_space.n,env.action_space.n) # type: ignore
+        case "Mountain-Car":
+            raise Exception("Developing")
+        case _:
+            raise Exception("Environment not registred")
+    
     policies_path = "policies/"
     if not os.path.exists(policies_path):
         os.mkdir(policies_path)
+        
     agent = QLearningAgent(env,Q_shape)
     train(env,agent,policies_path)
+    
     print('End')
     
     
