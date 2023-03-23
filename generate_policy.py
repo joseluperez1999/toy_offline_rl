@@ -1,6 +1,6 @@
 import gymnasium as gym
 import os
-from QLearningAgent import QLearningAgent
+from agents.QLearningAgent import QLearningAgent
 import joblib
 import argparse
 
