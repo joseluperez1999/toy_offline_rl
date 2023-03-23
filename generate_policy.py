@@ -28,7 +28,7 @@ def run_episode(agent, env, validation = False, render = False):
         next_state, reward, done,_ ,_ = env.step(action)
         
         if not validation:
-            agent.update_q_table(state, action, reward, next_state)
+            agent.update_q_table(state, action, reward, next_state, ALPHA, GAMMA)
 
         state = next_state
         accumulated_reward += reward
@@ -42,7 +42,7 @@ def save_policy(path,agent,episode):
     if not os.path.exists(path):
         print("Generating policies directory for this env")
         os.makedirs(path)
-    joblib.dump(agent.Q_table,f'{path} policy_episode_{episode}.pkl', compress=1)
+    joblib.dump(agent.Q_table,f'{path}policy_episode_{episode}.pkl', compress=1)
         
 def train(env,agent,policies_path):
     env_path = policies_path + "Frozen_Lake/"
@@ -66,12 +66,13 @@ def train(env,agent,policies_path):
             save_policy(env_path,agent,episode + 1)
         
 if __name__ == '__main__':
+    #Meter argumentos de entorno, agente e hiperparámetros por argumento
     env = gym.make('FrozenLake-v1', desc=None, map_name="8x8", is_slippery=False)
     Q_shape = (env.observation_space.n,env.action_space.n) # type: ignore
     policies_path = "policies/"
     if not os.path.exists(policies_path):
         os.mkdir(policies_path)
-    agent = QLearningAgent(env,Q_shape,ALPHA,GAMMA)
+    agent = QLearningAgent(env,Q_shape)
     train(env,agent,policies_path)
     print('End')
     
