@@ -30,7 +30,7 @@ def collect(env, agent, datasets_path, n_episodes, expertise, exploration_rate =
         os.makedirs(datasets_path)
         
     #Mejorar nomenclatura datasets
-    joblib.dump(dataset,f'{datasets_path}dataset_{n_episodes}_{expertise}_{exploration_rate}.pkl', compress=1)
+    joblib.dump(dataset,f'{datasets_path}dataset_{n_episodes}_{expertise}_{str(exploration_rate).replace(".", "-")}.pkl', compress=1)
 
 if __name__ == '__main__':
     #Meter argumentos de entorno, agente e hiperparámetros por argumento
