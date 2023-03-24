@@ -38,7 +38,7 @@ if __name__ == '__main__':
     parser.add_argument('--env', '-e', type=str, required=True, help='Environment name')
     parser.add_argument('--amount', '-a', type=int, required=True, help='Number of episodes to collect')
     parser.add_argument('--level', '-l', type=int, required=True, help='Expertise level of policy')
-    parser.add_argument('--randomness', '-r', type=int, required=True, help='Exploration rate')
+    parser.add_argument('--randomness', '-r', type=float, required=True, help='Exploration rate')
     args = parser.parse_args()
     
     match args.env:
