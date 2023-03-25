@@ -7,7 +7,7 @@ import joblib
 
 from agents.QLearningAgent import QLearningAgent
 
-TRAIN_EPISODES = 50
+TRAIN_EPISODES = 20
 VALIDATION_EPISODES = 10
 
 ALPHA = 0.2
@@ -25,7 +25,7 @@ def run_episode(agent, env):
     obs = env.reset()[0]
     total_reward = 0
     current_action = 0
-    max_actions = 50
+    max_actions = 30
     while not done and current_action < max_actions:
         action = agent.get_action(obs, 0)
         next_obs, reward, done, _, _ = env.step(action)
