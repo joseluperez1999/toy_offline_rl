@@ -3,4 +3,5 @@ __pycache__
 toy-env
 policies
 datasets
-offline_learning
+results
+run.bat
