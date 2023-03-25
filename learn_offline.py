@@ -75,7 +75,7 @@ if __name__ == '__main__':
     parser.add_argument("--trayectories", "-t", type=int, required=True, help="Dataset trayectories to use")
     parser.add_argument("--level", "-l", type=int, required=True, help="Dataset expertise level to use")
     parser.add_argument("--randomness", "-r", type=float, required=True, help="Dataset randomness to use")
-    parser.add_argument("--verbose", "-v", type=bool, default=True, help="See traces or not")
+    parser.add_argument("--verbose", "-v", action=argparse.BooleanOptionalAction, help="See traces or not")
     args = parser.parse_args()
     
     match args.env:
