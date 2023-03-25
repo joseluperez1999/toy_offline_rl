@@ -82,7 +82,8 @@ if __name__ == '__main__':
         case "Frozen-Lake":
             env = gym.make("FrozenLake-v1", desc=None, map_name="8x8", is_slippery=False)
             Q_shape = (env.observation_space.n,env.action_space.n) # type: ignore
-            print(f"Loaded {env.spec.id} environment with Q-table shape of {Q_shape}")
+            if args.verbose:
+                print(f"Loaded {env.spec.id} environment with Q-table shape of {Q_shape}")
         case "Mountain-Car":
             raise Exception("Developing")
         case _:
@@ -91,7 +92,8 @@ if __name__ == '__main__':
     try:
         randomness = str(args.randomness).replace(".", "-")
         dataset = joblib.load(f"datasets/{env.spec.id}/dataset_{args.trayectories}_{args.level}_{randomness}.pkl")
-        print(f"Loaded dataset with {args.trayectories} episodes, {args.level} policy's level and {randomness} exploration rate")
+        if args.verbose:
+            print(f"Loaded dataset with {args.trayectories} episodes, {args.level} policy's level and {randomness} exploration rate")
     
     except FileNotFoundError:
         raise Exception("Specified dataset does not exist")
@@ -102,12 +104,14 @@ if __name__ == '__main__':
         
     agent = QLearningAgent(env,Q_shape)
     dataset_info = (args.trayectories, args.level, randomness)
-    print("Start training")
+    if args.verbose:
+        print("Start training")
     start = time()
     train(env,agent,dataset, results_path + env.spec.id + "/", dataset_info, args.verbose)
     end = time()
     
-    print(f"Finish training. Time spent: {round(end - start, 2)}s")
+    if args.verbose: 
+        print(f"Finish training. Time spent: {round(end - start, 2)}s")
 
     with open(results_path + env.spec.id + "/times.txt", "a+") as times_file:
         times_file.write(f"{dataset_info}: {round(end - start, 2)}s")
