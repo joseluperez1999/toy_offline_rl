@@ -39,7 +39,7 @@ def run_episode(agent, env):
 
 def save_data(path, data, save_type, dataset_info):
     if not os.path.exists(path):
-        print("Generating policies directory for this env")
+        print("Generating results directory for this env")
         os.makedirs(path)
     joblib.dump(data,f'{path}{save_type}_{dataset_info[0]}_{dataset_info[1]}_{dataset_info[2]}.pkl', compress=1)
 
