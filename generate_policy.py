@@ -9,8 +9,9 @@ from agents.QLearningAgent import QLearningAgent
 ALPHA = 0.7
 GAMMA = 0.95
 EPSILON = 0.2
+NUM_BINS = 30
 
-TRAIN_EPISODES = 2000
+TRAIN_EPISODES = 100000
 VALIDATION_STEPS = 10
 VALIDATION_EPISODES = 100
 
@@ -79,7 +80,8 @@ if __name__ == '__main__':
             env = gym.make("FrozenLake-v1", desc=None, map_name="8x8", is_slippery=False)
             Q_shape = (env.observation_space.n,env.action_space.n) # type: ignore
         case "Mountain-Car":
-            raise Exception("Developing")
+            env =gym.make('MountainCar-v0')
+            Q_shape = [NUM_BINS] * env.observation_space.shape[0] + [env.action_space.n]
         case _:
             raise Exception("Environment not registred")
     
