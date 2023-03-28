@@ -23,3 +23,4 @@ Datasets nomenclature:
 Envs allowed:
 
     Frozen-Lake
+    Mountain-Car
