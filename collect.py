@@ -12,12 +12,13 @@ def collect(env, agent, datasets_path, n_episodes, expertise, exploration_rate =
     for i in range(n_episodes):
         episode = []
         done = False
+        truncated = False
         state = env.reset()[0]
-        while not done:
+        while not (done or truncated):
             action = agent.get_action(state, exploration_rate)
-            next_state, reward, done,_ ,_ = env.step(action)
+            next_state, reward, done, truncated, _ = env.step(action)
             
-            transition = (state,action,next_state,reward,done)
+            transition = (state, action, next_state, reward, done, truncated)
             episode.append(transition)
             
             state = next_state
@@ -45,7 +46,7 @@ if __name__ == '__main__':
         case "Frozen-Lake":
             env = gym.make("FrozenLake-v1", desc=None, map_name="8x8", is_slippery=False)
         case "Mountain-Car":
-            raise Exception("Developing")
+            env =gym.make('MountainCar-v0')
         case _:
             raise Exception("Environment not registred")
         

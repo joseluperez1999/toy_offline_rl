@@ -6,3 +6,4 @@ datasets
 results
 run.bat
 analysis.py
+render.py
