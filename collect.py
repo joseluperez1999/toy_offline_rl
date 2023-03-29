@@ -6,6 +6,8 @@ import joblib
 
 from agents.QLearningAgent import QLearningAgent
 
+from utils.quality import tq, saco
+
 
 def collect(env, agent, datasets_path, n_episodes, expertise, exploration_rate = 0):
     dataset = []
@@ -33,6 +35,8 @@ def collect(env, agent, datasets_path, n_episodes, expertise, exploration_rate =
     #Mejorar nomenclatura datasets
     joblib.dump(dataset,f'{datasets_path}dataset_{n_episodes}_{expertise}_{str(exploration_rate).replace(".", "-")}.pkl', compress=1)
 
+    return dataset
+
 if __name__ == '__main__':
     #Meter argumentos de entorno, agente e hiperparámetros por argumento
     parser = argparse.ArgumentParser(description='Generate policies given an environment')
@@ -57,6 +61,12 @@ if __name__ == '__main__':
     path =  "datasets/"
     if not os.path.exists(path):
         os.mkdir(path)
-    collect(env, agent, path, args.amount, args.level, args.randomness)
+        
+    dataset = collect(env, agent, path, args.amount, args.level, args.randomness)
+    
+    tq = tq(dataset)
+    saco = saco(env,dataset)
+    
+    #TO:DO - Report module
     
     print("End")
