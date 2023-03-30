@@ -6,18 +6,21 @@ import joblib
 
 from agents.QLearningAgent import QLearningAgent
 
+from utils.quality import tq, saco
+
 
 def collect(env, agent, datasets_path, n_episodes, expertise, exploration_rate = 0):
     dataset = []
     for i in range(n_episodes):
         episode = []
         done = False
+        truncated = False
         state = env.reset()[0]
-        while not done:
+        while not (done or truncated):
             action = agent.get_action(state, exploration_rate)
-            next_state, reward, done,_ ,_ = env.step(action)
+            next_state, reward, done, truncated, _ = env.step(action)
             
-            transition = (state,action,next_state,reward,done)
+            transition = (state, action, next_state, reward, done, truncated)
             episode.append(transition)
             
             state = next_state
@@ -32,6 +35,8 @@ def collect(env, agent, datasets_path, n_episodes, expertise, exploration_rate =
     #Mejorar nomenclatura datasets
     joblib.dump(dataset,f'{datasets_path}dataset_{n_episodes}_{expertise}_{str(exploration_rate).replace(".", "-")}.pkl', compress=1)
 
+    return dataset
+
 if __name__ == '__main__':
     #Meter argumentos de entorno, agente e hiperparámetros por argumento
     parser = argparse.ArgumentParser(description='Generate policies given an environment')
@@ -45,7 +50,7 @@ if __name__ == '__main__':
         case "Frozen-Lake":
             env = gym.make("FrozenLake-v1", desc=None, map_name="8x8", is_slippery=False)
         case "Mountain-Car":
-            raise Exception("Developing")
+            env =gym.make('MountainCar-v0')
         case _:
             raise Exception("Environment not registred")
         
@@ -56,6 +61,12 @@ if __name__ == '__main__':
     path =  "datasets/"
     if not os.path.exists(path):
         os.mkdir(path)
-    collect(env, agent, path, args.amount, args.level, args.randomness)
+        
+    dataset = collect(env, agent, path, args.amount, args.level, args.randomness)
+    
+    tq = tq(dataset)
+    saco = saco(env,dataset)
+    
+    #TO:DO - Report module
     
     print("End")
