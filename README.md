@@ -1,14 +1,14 @@
 Generate policies:
 
-    python generate_policy.py --env {env name}
+    python generate_policy.py --env {env name} --stochastic {appear if stochastic is desired}
 
 Collect datasets:
 
-    python collect.py --env {env name} --level {policy expertise} --amount {number of episodes to collect} --randomness {exploration rate}
+    python collect.py --env {env name} --level {policy expertise} --amount {number of episodes to collect} --randomness {exploration rate} --stochastic {appear if stochastic is desired}
 
 Learn offline: 
 
-    python learn_offline.py --env {env name} --trayectories {number of trayectories} --level {policy expertise} --randomness {exploration rate} --verbose {traces visible or not}
+    python learn_offline.py --env {env name} --trayectories {number of trayectories} --level {policy expertise} --randomness {exploration rate} --verbose {traces visible or not} --stochastic {appear if stochastic is desired}
 
 Results obtained from learning offline are:
 
