@@ -9,7 +9,7 @@ from agents.QLearningAgent import QLearningAgent
 from utils.quality import tq, saco
 
 
-def collect(env, agent, datasets_path, n_episodes, expertise, exploration_rate = 0):
+def collect(env, agent, datasets_path, n_episodes, expertise, stochastic, exploration_rate = 0):
     dataset = []
     for i in range(n_episodes):
         episode = []
@@ -33,7 +33,10 @@ def collect(env, agent, datasets_path, n_episodes, expertise, exploration_rate =
         os.makedirs(datasets_path)
         
     #Mejorar nomenclatura datasets
-    joblib.dump(dataset,f'{datasets_path}dataset_{n_episodes}_{expertise}_{str(exploration_rate).replace(".", "-")}.pkl', compress=1)
+    if stochastic:
+        joblib.dump(dataset,f'{datasets_path}dataset_{n_episodes}_{expertise}_{str(exploration_rate).replace(".", "-")}_s.pkl', compress=1)
+    else:
+        joblib.dump(dataset,f'{datasets_path}dataset_{n_episodes}_{expertise}_{str(exploration_rate).replace(".", "-")}.pkl', compress=1)
 
     return dataset
 
@@ -44,17 +47,23 @@ if __name__ == '__main__':
     parser.add_argument('--amount', '-a', type=int, required=True, help='Number of episodes to collect')
     parser.add_argument('--level', '-l', type=int, required=True, help='Expertise level of policy')
     parser.add_argument('--randomness', '-r', type=float, required=True, help='Exploration rate')
+    parser.add_argument("--stochastic", "-s", action=argparse.BooleanOptionalAction, help="Set stochastic behaviour in case it exists for environment")
     args = parser.parse_args()
     
     match args.env:
         case "Frozen-Lake":
-            env = gym.make("FrozenLake-v1", desc=None, map_name="8x8", is_slippery=False)
+            env = gym.make("FrozenLake-v1", desc=None, map_name="8x8", is_slippery=args.stochastic)
         case "Mountain-Car":
+            if args.stochastic:
+                raise Exception("Environment has no stochastic version")
             env =gym.make('MountainCar-v0')
         case _:
             raise Exception("Environment not registred")
-        
-    policy = joblib.load(f"policies/{env.spec.id}/policy_episode_{args.level}.pkl") # type: ignore
+    
+    if args.stochastic:
+        policy = joblib.load(f"policies/{env.spec.id}/policy_episode_{args.level}_s.pkl") # type: ignore
+    else:
+        policy = joblib.load(f"policies/{env.spec.id}/policy_episode_{args.level}.pkl") # type: ignore
     agent = QLearningAgent(env,policy.shape)
     agent.set_policy(policy)
     
@@ -62,7 +71,7 @@ if __name__ == '__main__':
     if not os.path.exists(path):
         os.mkdir(path)
         
-    dataset = collect(env, agent, path, args.amount, args.level, args.randomness)
+    dataset = collect(env, agent, path, args.amount, args.level, args.stochastic, args.randomness)
     
     tq = tq(dataset)
     saco = saco(env,dataset)

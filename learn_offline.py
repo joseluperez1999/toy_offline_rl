@@ -7,8 +7,8 @@ import joblib
 
 from agents.QLearningAgent import QLearningAgent
 
-TRAIN_EPISODES = 20
-VALIDATION_EPISODES = 10
+TRAIN_EPISODES = 200
+VALIDATION_EPISODES = 50
 
 ALPHA = 0.2
 GAMMA = 0.99
@@ -41,7 +41,11 @@ def save_data(path, data, save_type, dataset_info):
     if not os.path.exists(path):
         print("Generating results directory for this env")
         os.makedirs(path)
-    joblib.dump(data,f'{path}{save_type}_{dataset_info[0]}_{dataset_info[1]}_{dataset_info[2]}.pkl', compress=1)
+    
+    if dataset_info[3]:
+        joblib.dump(data,f'{path}{save_type}_{dataset_info[0]}_{dataset_info[1]}_{dataset_info[2]}_s.pkl', compress=1)
+    else:
+        joblib.dump(data,f'{path}{save_type}_{dataset_info[0]}_{dataset_info[1]}_{dataset_info[2]}.pkl', compress=1)
 
 
 def train(env, agent, dataset, results_path, dataset_info, verbose):
@@ -76,22 +80,29 @@ if __name__ == '__main__':
     parser.add_argument("--level", "-l", type=int, required=True, help="Dataset expertise level to use")
     parser.add_argument("--randomness", "-r", type=float, required=True, help="Dataset randomness to use")
     parser.add_argument("--verbose", "-v", action=argparse.BooleanOptionalAction, help="See traces or not")
+    parser.add_argument("--stochastic", "-s", action=argparse.BooleanOptionalAction, help="Set stochastic behaviour in case it exists for environment")
     args = parser.parse_args()
     
     match args.env:
         case "Frozen-Lake":
-            env = gym.make("FrozenLake-v1", desc=None, map_name="8x8", is_slippery=False)
+            env = gym.make("FrozenLake-v1", desc=None, map_name="8x8", is_slippery=args.stochastic)
             Q_shape = (env.observation_space.n,env.action_space.n) # type: ignore
             if args.verbose:
                 print(f"Loaded {env.spec.id} environment with Q-table shape of {Q_shape}")
         case "Mountain-Car":
+            if args.stochastic:
+                raise Exception("Environment has no stochastic version")
             raise Exception("Developing")
         case _:
             raise Exception("Environment not registred")
         
     try:
         randomness = str(args.randomness).replace(".", "-")
-        dataset = joblib.load(f"datasets/{env.spec.id}/dataset_{args.trayectories}_{args.level}_{randomness}.pkl")
+        if args.stochastic:
+            dataset = joblib.load(f"datasets/{env.spec.id}/dataset_{args.trayectories}_{args.level}_{randomness}_s.pkl")
+        else:
+            dataset = joblib.load(f"datasets/{env.spec.id}/dataset_{args.trayectories}_{args.level}_{randomness}_s.pkl")
+
         if args.verbose:
             print(f"Loaded dataset with {args.trayectories} episodes, {args.level} policy's level and {randomness} exploration rate")
     
@@ -103,7 +114,7 @@ if __name__ == '__main__':
         os.mkdir(results_path)
         
     agent = QLearningAgent(env,Q_shape)
-    dataset_info = (args.trayectories, args.level, randomness)
+    dataset_info = (args.trayectories, args.level, randomness, args.stochastic)
     if args.verbose:
         print("Start training")
     start = time()
@@ -113,6 +124,6 @@ if __name__ == '__main__':
     if args.verbose: 
         print(f"Finish training. Time spent: {round(end - start, 2)}s")
 
-    with open(results_path + env.spec.id + "/times.txt", "a+") as times_file:
+    with open(results_path + env.spec.id + "/times_s.txt", "a+") as times_file:
         times_file.write(f"{dataset_info}: {round(end - start, 2)}s")
         times_file.write("\n")
